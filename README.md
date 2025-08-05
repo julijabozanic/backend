@@ -51,7 +51,7 @@ This project provides:
 **JWT Authentication:**  
 I haven’t had the opportunity to work with JWT before. Tried to teach myself over the past few days, but obviously without success. `:)`
 
-**unit tests**  
+**Unit tests**  
 I was busy trying to complete the previous item, so I intentionally skipped this one.  
 
 ---
