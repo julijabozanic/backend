@@ -9,8 +9,7 @@ Spring Boot + MongoDB REST API for managing products and a shopping cart, with a
 - [Technologies](#technologies)  
 - [Prerequisites](#prerequisites)
 - [Project Setup Instructions](#setup)  
-- [Troubles](#troubles)  
-- [Docker](#docker)  
+- [Troubles](#troubles) 
 
 ---
 
@@ -67,9 +66,3 @@ I haven’t had the opportunity to work with JWT before. Tried to teach myself o
 I was busy trying to complete the previous item, so I intentionally skipped this one.  
 
 ---
-
-## Docker
-
-### Build the Docker image  
-```bash
-docker build -t my-backend-app .
