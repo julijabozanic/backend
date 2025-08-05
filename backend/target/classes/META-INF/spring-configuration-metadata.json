@@ -1,0 +1,27 @@
+{
+  "groups": [
+    {
+      "name": "jwt",
+      "type": "com.example.backend.config.JwtProperties",
+      "sourceType": "com.example.backend.config.JwtProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "jwt.expiration-ms",
+      "type": "java.lang.Long",
+      "description": "Isticanje tokena u milisekundama",
+      "sourceType": "com.example.backend.config.JwtProperties"
+    },
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Tajni ključ za potpisivanje tokena",
+      "sourceType": "com.example.backend.config.JwtProperties"
+    }
+  ],
+  "hints": [],
+  "ignored": {
+    "properties": []
+  }
+}

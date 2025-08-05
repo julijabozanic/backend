@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Products and Cart</title>
+</head>
+<body>
+    <h1>Product List</h1>
+
+    <!-- Login form -->
+    <div style="margin-bottom: 20px;">
+        <h2>Login</h2>
+        <label>Username: <input type="text" id="username" /></label>
+        <label>Password: <input type="password" id="password" /></label>
+        <button onclick="login()">Login</button>
+        <p id="login-status" style="color: green;"></p>
+    </div>
+
+    <!-- Filters and buttons -->
+    <div>
+        <label>Page: <input type="number" id="page" value="0" min="0" /></label>
+        <label>Size: <input type="number" id="size" value="10" min="1" /></label>
+        <label>Sort by:
+            <select id="sortBy">
+                <option value="name">Name</option>
+                <option value="price">Price</option>
+            </select>
+        </label>
+        <label>Filter by Name:
+            <input type="text" id="filterName" placeholder="e.g. hammer or drill" />
+        </label>
+        <label>Min Price:
+            <input type="number" id="minPrice" step="0.01" placeholder="e.g. 100" />
+        </label>
+        <label>Max Price:
+            <input type="number" id="maxPrice" step="0.01" placeholder="e.g. 300" />
+        </label>
+        <button onclick="loadProducts()">Show Products</button>
+        <button onclick="loadCart()">Show Cart</button>
+    </div>
+
+    <!-- Display areas -->
+    <div id="product-list" style="margin-top: 20px;"></div>
+    <div id="cart-section" style="margin-top: 40px;"></div>
+
+    <script>
+        // Store logged-in username
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            })
+            .then(res => res.text().then(text => ({ ok: res.ok, text })))
+            .then(({ ok, text }) => {
+                const el = document.getElementById("login-status");
+                if (ok) {
+                    el.textContent = "✅ " + text;
+                    localStorage.setItem('userId', username);
+                } else {
+                    el.textContent = "❌ " + text;
+                    el.style.color = 'red';
+                }
+            })
+            .catch(() => {
+                document.getElementById("login-status").textContent = "❌ Login error";
+            });
+        }
+
+        function loadProducts() {
+            const page = document.getElementById("page").value;
+            const size = document.getElementById("size").value;
+            const sortBy = document.getElementById("sortBy").value;
+            const name = document.getElementById("filterName").value;
+            const minPrice = document.getElementById("minPrice").value;
+            const maxPrice = document.getElementById("maxPrice").value;
+
+            let url = `/api/products?page=${page}&size=${size}&sortBy=${sortBy}`;
+            if (name)      url += `&name=${encodeURIComponent(name)}`;
+            if (minPrice)  url += `&minPrice=${minPrice}`;
+            if (maxPrice)  url += `&maxPrice=${maxPrice}`;
+
+            fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error("Failed to load products");
+                return response.json();
+            })
+            .then(products => {
+                const container = document.getElementById("product-list");
+                container.innerHTML = "";
+                if (products.length === 0) {
+                    container.innerHTML = "<p>No products found.</p>";
+                    return;
+                }
+                products.forEach(prod => {
+                    const div = document.createElement("div");
+                    div.id = "product-" + prod.id;
+                    div.innerHTML = `
+                        <h3>${prod.name}</h3>
+                        <p>Price: $${prod.price}</p>
+                        <label>Quantity:
+                          <input type="number" id="qty-${prod.id}" value="1" min="1" />
+                        </label>
+                        <button onclick="addToCart('${prod.id}')">Add to Cart</button>
+                        <button onclick="getProductDetails('${prod.id}')">More Info</button>
+                        <div id="details-${prod.id}" style="margin-top: 10px; color: gray;"></div>
+                        <hr/>
+                    `;
+                    container.appendChild(div);
+                });
+            })
+            .catch(error => console.error(error));
+        }
+
+        function addToCart(productId) {
+            const quantity = parseInt(document.getElementById(`qty-${productId}`).value);
+            const userId = localStorage.getItem('userId');
+            if (!userId) { alert('❌ Not logged in'); return; }
+
+            fetch("/api/cart/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ productId, quantity, userId })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Add failed');
+                return res.json();
+            })
+            .then(() => alert('✅ Product added to cart!'))
+            .catch(error => console.error(error));
+        }
+
+        function getProductDetails(productId) {
+            fetch(`/api/products/${productId}`)
+            .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+            .then(prod => {
+                const div = document.getElementById(`details-${prod.id}`);
+                const specs = Object.entries(prod.technicalSpecifications || {})
+                    .map(([k,v]) => `<li>${k}: ${v}</li>`)
+                    .join('');
+                div.innerHTML = `
+                    <p><strong>Description:</strong> ${prod.fullDescription}</p>
+                    <ul>${specs}</ul>
+                `;
+            })
+            .catch(() => {});
+        }
+
+        function loadCart() {
+            const userId = localStorage.getItem('userId');
+            if (!userId) { alert('❌ Not logged in'); return; }
+
+            fetch(`/api/cart?userId=${encodeURIComponent(userId)}`)
+            .then(res => res.json())
+            .then(items => {
+                const div = document.getElementById('cart-section');
+                div.innerHTML = '<h2>🛒 Cart Contents</h2>';
+                if (items.length === 0) {
+                    div.innerHTML += '<p>Cart is empty.</p>';
+                    return;
+                }
+                items.forEach(item => {
+                    div.innerHTML += `<p>${item.product.name} × ${item.quantity}</p>`;
+                });
+            })
+            .catch(error => console.error(error));
+        }
+
+        window.onload = loadProducts;
+    </script>
+</body>
+</html>
