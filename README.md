@@ -5,10 +5,10 @@ Spring Boot + MongoDB REST API for managing products and a shopping cart, with a
 ---
 
 ## Table of Contents
-
 - [Description](#description)  
 - [Technologies](#technologies)  
-- [Prerequisites](#prerequisites)  
+- [Prerequisites](#prerequisites)
+- [Project Setup Instructions](#setup)  
 - [Troubles](#troubles)  
 - [Docker](#docker)  
 
@@ -45,6 +45,18 @@ This project provides:
 - MongoDB  
 
 ---
+
+## Project Setup Instructions
+1. Clone the Repository
+   - git clone <repo-url>
+   - cd backend
+3. MongoDB Database Setup
+   - Create a new database named bazaBosch
+   - Import your provided .json file into the newly created database to make a collection named products
+4. Run the Backend Application
+   - ./mvnw spring-boot:run
+5. Access the Frontend
+   - http://localhost:8080/testing.html
 
 ## Troubles
 
